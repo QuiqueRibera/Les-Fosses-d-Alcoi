@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Les Fosses d'Alcoi</title>
+    <!-- MapLibre GL JS CSS -->
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <!-- Fuentes de Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: transparent;
+            color: #333333;
+        }
+
+        /* Contenedor del Mapa */
+        #map {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            z-index: 0;
+            background-color: #e0f7fa;
+        }
+
+        /* --- FILTRO AZUL TÉCNICO --- */
+        #map canvas {
+            filter: grayscale(100%) sepia(100%) hue-rotate(160deg) saturate(2.5) brightness(1.1) contrast(0.9);
+            transition: filter 0.5s ease;
+        }
+
+        /* Contenedor de la historia */
+        #features {
+            width: 100%;
+            position: relative;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Cajas de texto (Capítulos) */
+        .step {
+            width: 30%;
+            min-width: 300px;
+            margin-left: 5%;
+            margin-bottom: 40vh; /* Espacio entre cuadros individuales */
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.95); 
+            color: #333;
+            border-left: 5px solid #00b1ea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            transition: opacity 0.5s ease;
+            pointer-events: auto;
+        }
+
+        /* Ajuste primer elemento (Intro) */
+        .step:first-child {
+            margin-top: 40vh;
+        }
+
+        /* Ajuste último elemento */
+        .step:last-child {
+            margin-bottom: 50vh;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .step {
+                width: 85%;
+                margin: 0 auto 50vh auto;
+            }
+            .step:first-child {
+                margin-top: 60vh;
+            }
+        }
+
+        /* Tipografía */
+        h2 {
+            margin-top: 0;
+            color: #00b1ea;
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        h3 {
+            margin-top: 0;
+            font-size: 1rem;
+            color: #666;
+            font-weight: 400;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            line-height: 1.5;
+            font-size: 15px;
+            margin-bottom: 0;
+            margin-top: 0;
+        }
+        
+        .victim-name {
+            font-weight: bold;
+            color: #00b1ea;
+        }
+
+        /* Popup */
+        .maplibregl-popup-content {
+            background-color: #fff;
+            color: #333;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Roboto', sans-serif;
+            border-left: 3px solid #00b1ea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .maplibregl-popup-close-button {
+            color: #333;
+        }
+
+        ::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; }
+
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <div id="features">
+        
+        <!-- ================= PASO 0: INTRO (VISTA GENERAL) ================= -->
+        <!-- Oculto visualmente pero presente en el DOM para activar la vista general -->
+        <div id="intro" class="step" style="opacity: 0; pointer-events: none;"></div>
+
+        <!-- ================= PASO 1: MAS DE NUÑO ================= -->
+        
+        <div id="masnuno-1" class="step">
+            <h2>Fossa al Mas del Nuño</h2>
+            <h3>Exhumada poc després de la Guerra Civil (23 de juny de 1939)</h3>
+            <p><strong>Context històric:</strong> Massacre al Círcul Industrial.</p>
+        </div>
+
+        <div id="masnuno-2" class="step">
+            <p><span class="victim-name">Arturo Llorens Peña</span>. Era Capellà. Va ser traslladat al Cementeri d’Alcoi.</p>
+        </div>
+
+        <div id="masnuno-3" class="step">
+             <p><span class="victim-name">Remigio Esteve Abad</span>. Era Capellà. Va ser traslladat al Cementeri d’Alcoi.</p>
+        </div>
+
+        <div id="masnuno-4" class="step">
+            
+            <p><span class="victim-name">Rodolfo Terol Aznar</span></p>
+        </div>
+
+        <div id="masnuno-5" class="step">
+            
+            <p><span class="victim-name">Juan Santonja Llacer</span></p>
+        </div>
+
+        <div id="masnuno-6" class="step">
+            
+            <p><span class="victim-name">Francisco Laporta Boronat</span></p>
+        </div>
+
+        <div id="masnuno-7" class="step">
+            
+            <p><span class="victim-name">Francisco Doménech García</span></p>
+        </div>
+
+        <div id="masnuno-8" class="step">
+            
+            <p><span class="victim-name">Luis Cantó Llopis</span></p>
+        </div>
+
+        <div id="masnuno-9" class="step">
+            
+            <p><span class="victim-name">Joaquín Catalá Payá</span></p>
+        </div>
+
+        <div id="masnuno-10" class="step">
+            
+            <p><span class="victim-name">Francisco Ferrándiz Abad</span></p>
+        </div>
+
+
+        <!-- ================= PASO 2: RIU RIQUER ================= -->
+
+        <div id="riuriquer-1" class="step">
+            <h2>Fossa prop del Riu Riquer</h2>
+            <h3>Exhumada. 4 víctimes</h3>
+        </div>
+
+        <div id="riuriquer-2" class="step">
+            
+            <p><span class="victim-name">José Boronat Payá (1870- 1936)</span>. Se sap que va ser sacerdot del Sant Sepulcre d’Alcoi. Va fundar el Patronato de Obreras del Sagrado Corazón. En noviembre de 1936 ingressa a la Pressó Habilitada d’Alcoi per ordre del Comité Revolucionari de Defensa d’Alcoi. Probablement el trauen (en el que es denominava ‘saca’) i l’afusellen l’11 de novembre de 1936. El cos el van trobar prop de Roglà i Corberà. El seu cos es troba al Valle de los Caídos.</p>
+        </div>
+
+        <div id="riuriquer-3" class="step">
+            
+            <p><span class="victim-name">Luis Bosch Sempere (1893- 1936)</span>. Va ser Capellà de Sant Mauro. Entra en la Pressó Habilitada d’Alcoi el 3 de novembre de 1936. Va ser afusellat l’11 de novembre de 1936. Un a Font assegura que el cos es va trobar entre Benifallim i Penàguila, mentre que una altra font assegura que es va trobar a Roglà i Corberà, on sembla ser que va ser soterrat. El seu cos es troba al Valle de los Caídos.</p>
+        </div>
+
+        <div id="riuriquer-4" class="step">
+            
+            <p><span class="victim-name">Salvador Sempere Jordá</span>. Va ser un legionari que va morir durant la guerra en campanya. Va ser soterrat a Cuelgamuros. A la fosa 833/2009ALC. El seu cos es troba al Valle de los Caídos.</p>
+        </div>
+
+        <div id="riuriquer-5" class="step">
+            
+            <p><span class="victim-name">José Blanes García</span>. Era un estudiant i falangista. Es va trobar el seu cos al port de la Carrasqueta en novembre del 1936 (data aproximada). El seu cos es troba al Valle de los Caídos.</p>
+        </div>
+
+
+        <!-- ================= PASO 3: CEMENTERI ALCOI II ================= -->
+
+        <div id="cementeri2-1" class="step">
+            <h2>Fossa al Cementeri d’Alcoi II</h2>
+            <p><strong>Context històric:</strong> Repressió franquista a la Dictadura. Entre el 16 de juny i el 25 de setembre del 1939 van ser afussellades 17 persones a Alcoi, Banyeres, Cocentaina, Gorga i Muro. Es van afegir a aquesta fosa dos persones que havien mort a la presó. Tan sols dos de les persones han sigut idetificades.</p>
+        </div>
+
+        <div id="cementeri2-2" class="step">
+            
+            <p><span class="victim-name">Vicente Moltó Gisbert</span>. Tenia 31 anys. Era d’Alcoi i era orbrer de professió.</p>
+        </div>
+
+        <div id="cementeri2-3" class="step">
+           
+            <p><span class="victim-name">Luis Molina Andres</span>. Tenia 23 anys. Era de Banyeres i teixidor de professió.</p>
+        </div>
+
+        <div id="cementeri2-4" class="step">
+            
+            <p><span class="victim-name">Francisco Vicente Calatayud Cortés</span>. Tenia 31 anys. Era de Banyeres i era xòfer.</p>
+        </div>
+
+        <div id="cementeri2-5" class="step">
+            
+            <p><span class="victim-name">Guillermo Francés Francés</span>. Tenia 32 anys. Era de Banyeres i era paperer de professió.</p>
+        </div>
+
+        <div id="cementeri2-6" class="step">
+            
+            <p><span class="victim-name">Pablo R. Molina López</span>. Tenia 39 anys. Era de Banyeres i recaptador.</p>
+        </div>
+
+        <div id="cementeri2-7" class="step">
+            
+            <p><span class="victim-name">José Albero Sanz</span>. Tenia 39 anys. Era de Banyeres i obrer de professió.</p>
+        </div>
+
+        <div id="cementeri2-8" class="step">
+            
+            <p><span class="victim-name">Ángel Pérez Molto</span></p>
+        </div>
+
+        <div id="cementeri2-9" class="step">
+            
+            <p><span class="victim-name">Fausto Bataller Paya</span>. Era de Banyeres.</p>
+        </div>
+
+        <div id="cementeri2-10" class="step">
+            
+            <p><span class="victim-name">Francisco Gisbert Vicent</span>. Era de Cocentaina.</p>
+        </div>
+
+        <div id="cementeri2-11" class="step">
+            
+            <p><span class="victim-name">José Domenech Agullo</span>. Era de Cocentaina.</p>
+        </div>
+
+        <div id="cementeri2-12" class="step">
+            
+            <p><span class="victim-name">Vicente Ferrandiz Molto</span>. Era de Gorga.</p>
+        </div>
+
+        <div id="cementeri2-13" class="step">
+            
+            <p><span class="victim-name">Emili Barrachina Borrell</span>. Era de Gorga.</p>
+        </div>
+
+        <div id="cementeri2-14" class="step">
+            
+            <p><span class="victim-name">José Giner Andrés</span>. Era de Muro.</p>
+        </div>
+
+        <div id="cementeri2-15" class="step">
+            
+            <p><span class="victim-name">Enrique Vaño Nicomedes</span>. Tenia 28 anys. Era d’Alcoi.</p>
+        </div>
+
+        <div id="cementeri2-16" class="step">
+            
+            <p><span class="victim-name">José Vaño Botella</span>. Tenia 36 anys. Era d’Alcoi.</p>
+        </div>
+
+        <div id="cementeri2-17" class="step">
+            
+            <p><span class="victim-name">Francisco Puche Romeu</span>. Tenia 39 anys. Era d’Alcoi.</p>
+        </div>
+
+        <div id="cementeri2-18" class="step">
+            
+            <p><span class="victim-name">Evaristo Botella Asensi</span>. Tenia 59 anys. Era d’Alcoi i impressor de professió.</p>
+        </div>
+
+        <div id="cementeri2-19" class="step">
+            
+            <p><span class="victim-name">Francisco Llinares Fenollar</span>. Va morir a la presó. Tenia 34 anys. Era d’Alcoi i paperer.</p>
+        </div>
+
+        <div id="cementeri2-20" class="step">
+            
+            <p><strong>Persona sense identificar</strong>. Va morir a la presó. Tenia 58 anys. Era de la Vall d’Ebo.</p>
+        </div>
+
+
+        <!-- ================= PASO 4: CEMENTERI ALCOI III ================= -->
+
+        <div id="cementeri3-1" class="step">
+            <h2>Fossa al Cementeri d’Alcoi III</h2>
+            <p><strong>Context històric:</strong> Fossa de la Repressió de la Rereguarda Republicana. Després del fallit Colp d’Estat de 1936 la repressió va ser violenta sobre veïns, però també per als alts comandaments del quarter militar de la localitat que va prendre part en el colp d’estat, sofrint almenys la execució de 16 militars entre oficials, suboficials i soldats de menor graduació. Tots menys Gustavo Noguerol Adler es troben al Panteó Militar de l’antic Cementri Militar d’Alcoi. Tots son procedents d’Alcoi.</p>
+        </div>
+
+        <div id="cementeri3-2" class="step">
+            
+            <p><span class="victim-name">Salvador Cortils Riera</span>. Tenia 47 anys. Era d’Alcoi, Comandant.</p>
+        </div>
+
+        <div id="cementeri3-3" class="step">
+            
+            <p><span class="victim-name">Jose Díaz Ivañez</span>. Tenia 49 anys. Comandant.</p>
+        </div>
+
+        <div id="cementeri3-4" class="step">
+            
+            <p><span class="victim-name">José Bellver Crespo</span>. Tenia 30 anys. Sergent.</p>
+        </div>
+
+        <div id="cementeri3-5" class="step">
+            
+            <p><span class="victim-name">Francisco Villaplana Laporta</span>. Tenia 20 anys. Cabo.</p>
+        </div>
+
+        <div id="cementeri3-6" class="step">
+            
+            <p><span class="victim-name">Camilo Candela Moltó</span>. Tinent.</p>
+        </div>
+
+        <div id="cementeri3-7" class="step">
+            
+            <p><span class="victim-name">Gustavo Noguerol Adler</span>. Tenia 45 anys. Comandant.</p>
+        </div>
+
+        <div id="cementeri3-8" class="step">
+            
+            <p><span class="victim-name">Honorio Jarabo Jarabo</span>. Tenia 39 anys. Capità.</p>
+        </div>
+
+        <div id="cementeri3-9" class="step">
+            
+            <p><span class="victim-name">Luis Colomer Molinos</span>. Tenia 35 anys. Capità.</p>
+        </div>
+
+        <div id="cementeri3-10" class="step">
+            
+            <p><span class="victim-name">Juan Ruiz Guillem</span>. Tenia 43 anys. Capità.</p>
+        </div>
+
+        <div id="cementeri3-11" class="step">
+            
+            <p><span class="victim-name">Timoteo Dominguez Castellanos</span>. Tenia 48 anys. Capità.</p>
+        </div>
+
+        <div id="cementeri3-12" class="step">
+            
+            <p><span class="victim-name">Hermenegildo Ibañez Colomina</span>. Tenia 33 anys. Capità.</p>
+        </div>
+
+        <div id="cementeri3-13" class="step">
+            
+            <p><span class="victim-name">Luis Cubillos Maredo</span>. Tenia 33 anys. Capità.</p>
+        </div>
+
+        <div id="cementeri3-14" class="step">
+            
+            <p><span class="victim-name">José Vicedo Albors</span>. Tenia 35 anys. Tinent.</p>
+        </div>
+
+        <div id="cementeri3-15" class="step">
+            
+            <p><span class="victim-name">Fernando Alfaro Tercero</span>. Tenia 25 anys. Tinent.</p>
+        </div>
+
+        <div id="cementeri3-16" class="step">
+            
+            <p><span class="victim-name">Julián García Bernal</span>. Tenia 49 anys. Tinent.</p>
+        </div>
+
+        <div id="cementeri3-17" class="step">
+            
+            <p><span class="victim-name">Emilio Romeu Palazuelos</span>. Tenia 25 anys. Tinent.</p>
+        </div>
+        
+        <div class="step" style="opacity: 0;"></div>
+
+    </div>
+
+    <!-- MapLibre GL JS -->
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+    
+    <script>
+        const apiKey = 'iDTQZVhITfzwL0fI4pCY';
+
+        // Coordenadas
+        const masnuno_coords = [-0.5183275, 38.6956211]; 
+        const riuriquer_coords = [-0.4755321, 38.6994322];
+        const cementeri2_coords = [-0.474927, 38.681232 ]; 
+        const cementeri3_coords = [-0.475411, 38.681239]; 
+
+        const alcoi_general = [-0.477, 38.690];
+
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: `https://api.maptiler.com/maps/streets-v2/style.json?key=${apiKey}`, 
+            center: alcoi_general, // Back to general view
+            zoom: 13.5,
+            pitch: 0,
+            bearing: 0,
+            interactive: false, 
+            hash: false, 
+            collectResourceTiming: false
+        });
+
+        map.on('error', function(e) {
+            console.error("Error del mapa:", e);
+            if (e.error && e.error.status === 403) {
+                alert("Error 403: La API Key es inválida o el dominio no está autorizado en MapTiler.");
+            }
+        });
+
+        map.on('load', function() {
+            map.addSource('fosas', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': [
+                        {
+                            'type': 'Feature',
+                            'geometry': { 'type': 'Point', 'coordinates': masnuno_coords },
+                            'properties': { 'title': 'Fossa al Mas del Nuño', 'color_id': 'masnuno' }
+                        },
+                        {
+                            'type': 'Feature',
+                            'geometry': { 'type': 'Point', 'coordinates': riuriquer_coords },
+                            'properties': { 'title': 'Fossa prop del Riu Riquer', 'color_id': 'riuriquer' }
+                        },
+                        {
+                            'type': 'Feature',
+                            'geometry': { 'type': 'Point', 'coordinates': cementeri2_coords },
+                            'properties': { 'title': 'Fossa al Cementeri d’Alcoi II', 'color_id': 'cementeri2' }
+                        },
+                        {
+                            'type': 'Feature',
+                            'geometry': { 'type': 'Point', 'coordinates': cementeri3_coords },
+                            'properties': { 'title': 'Fossa al Cementeri d’Alcoi III', 'color_id': 'cementeri3' }
+                        }
+                    ]
+                }
+            });
+
+            map.addLayer({
+                'id': 'fosas-layer',
+                'type': 'circle',
+                'source': 'fosas',
+                'paint': {
+                    'circle-radius': 9,
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': '#00b1ea',
+                    'circle-color': '#00b1ea', 
+                    'circle-opacity': 0
+                }
+            });
+
+            const popup = new maplibregl.Popup({
+                closeButton: false,
+                closeOnClick: false,
+                offset: 15,
+                anchor: 'left'
+            });
+
+            map.on('mouseenter', 'fosas-layer', function (e) {
+                map.getCanvas().style.cursor = 'pointer';
+                const coordinates = e.features[0].geometry.coordinates.slice();
+                const title = e.features[0].properties.title;
+                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                }
+                popup.setLngLat(coordinates).setHTML(`<strong>${title}</strong>`).addTo(map);
+            });
+
+            map.on('mouseleave', 'fosas-layer', function () {
+                map.getCanvas().style.cursor = '';
+                popup.remove();
+            });
+        });
+
+        // Configuración de Capítulos
+        const chapters = {
+            'intro': {
+                center: alcoi_general,
+                zoom: 13.5,
+                bearing: 0,
+                pitch: 0,
+                locationId: 'intro' // No specific location active
+            },
+            // PASO 1: MAS DEL NUÑO (10 textos)
+            'masnuno-1': { center: masnuno_coords, zoom: 16.5, bearing: 20, pitch: 30, locationId: 'masnuno' },
+            'masnuno-2': { center: masnuno_coords, zoom: 16.5, bearing: 20, pitch: 30, locationId: 'masnuno' },
+            'masnuno-3': { center: masnuno_coords, zoom: 16.5, bearing: 20, pitch: 30, locationId: 'masnuno' },
+            'masnuno-4': { center: masnuno_coords, zoom: 16.5, bearing: 20, pitch: 30, locationId: 'masnuno' },
+            'masnuno-5': { center: masnuno_coords, zoom: 16.5, bearing: 20, pitch: 30, locationId: 'masnuno' },
+            'masnuno-6': { center: masnuno_coords, zoom: 16.5, bearing: 20, pitch: 30, locationId: 'masnuno' },
+            'masnuno-7': { center: masnuno_coords, zoom: 16.5, bearing: 20, pitch: 30, locationId: 'masnuno' },
+            'masnuno-8': { center: masnuno_coords, zoom: 16.5, bearing: 20, pitch: 30, locationId: 'masnuno' },
+            'masnuno-9': { center: masnuno_coords, zoom: 16.5, bearing: 20, pitch: 30, locationId: 'masnuno' },
+            'masnuno-10': { center: masnuno_coords, zoom: 16.5, bearing: 20, pitch: 30, locationId: 'masnuno' },
+
+            // PASO 2: RIU RIQUER (5 textos)
+            'riuriquer-1': { center: riuriquer_coords, zoom: 17, bearing: 0, pitch: 0, locationId: 'riuriquer' },
+            'riuriquer-2': { center: riuriquer_coords, zoom: 17, bearing: 0, pitch: 0, locationId: 'riuriquer' },
+            'riuriquer-3': { center: riuriquer_coords, zoom: 17, bearing: 0, pitch: 0, locationId: 'riuriquer' },
+            'riuriquer-4': { center: riuriquer_coords, zoom: 17, bearing: 0, pitch: 0, locationId: 'riuriquer' },
+            'riuriquer-5': { center: riuriquer_coords, zoom: 17, bearing: 0, pitch: 0, locationId: 'riuriquer' },
+
+            // PASO 3: CEMENTERI II (20 textos)
+            'cementeri2-1': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-2': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-3': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-4': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-5': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-6': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-7': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-8': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-9': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-10': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-11': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-12': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-13': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-14': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-15': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-16': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-17': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-18': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-19': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+            'cementeri2-20': { center: cementeri2_coords, zoom: 17.5, bearing: -20, pitch: 40, locationId: 'cementeri2' },
+
+            // PASO 4: CEMENTERI III (17 textos)
+            'cementeri3-1': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-2': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-3': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-4': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-5': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-6': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-7': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-8': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-9': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-10': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-11': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-12': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-13': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-14': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-15': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-16': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+            'cementeri3-17': { center: cementeri3_coords, zoom: 18, bearing: 0, pitch: 50, locationId: 'cementeri3' },
+        };
+
+        let activeChapterName = 'intro';
+
+        function setActiveChapter(chapterName) {
+            if (chapterName === activeChapterName) return;
+
+            const chapter = chapters[chapterName];
+
+            map.flyTo({
+                center: chapter.center,
+                zoom: chapter.zoom,
+                bearing: chapter.bearing,
+                pitch: chapter.pitch,
+                speed: 0.6,
+                curve: 1
+            });
+
+            if (map.getLayer('fosas-layer')) {
+                map.setPaintProperty('fosas-layer', 'circle-opacity', [
+                    'match',
+                    ['get', 'color_id'],
+                    chapter.locationId, 1, 
+                    0 
+                ]);
+            }
+
+            document.getElementById(chapterName).classList.add('active');
+            if (document.getElementById(activeChapterName)) {
+                document.getElementById(activeChapterName).classList.remove('active');
+            }
+
+            activeChapterName = chapterName;
+        }
+
+        function isElementOnScreen(id) {
+            const element = document.getElementById(id);
+            if (!element) return false;
+            const bounds = element.getBoundingClientRect();
+            return bounds.top < window.innerHeight - 150 && bounds.bottom > 100;
+        }
+
+        window.onscroll = function () {
+            const chapterNames = Object.keys(chapters);
+            for (let i = 0; i < chapterNames.length; i++) {
+                const chapterName = chapterNames[i];
+                if (isElementOnScreen(chapterName)) {
+                    setActiveChapter(chapterName);
+                    break;
+                }
+            }
+        };
+
+    </script>
+</body>
+</html>
